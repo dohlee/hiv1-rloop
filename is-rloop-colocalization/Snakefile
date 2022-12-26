@@ -1,0 +1,114 @@
+configfile: 'config.yaml'
+
+K = 1
+N_RANDOM = 100
+
+integration_site_dir = config['integration_site_dir']
+rloop_peak_dir = config['rloop_peak_dir']
+
+# Target conditions.
+#
+# Matching info
+# 
+# R-loop    IS-seq
+# 0hpi      5dpi
+# 3hpi      5dpi
+# 6hpi      5dpi
+# 12hpi     5dpi
+# NLS       NLS
+# MUT       MUT
+# WT        WT
+
+conditions = ['0hpi', '3hpi', '6hpi', '12hpi', 'NLS', 'MUT', 'WT', 'induced', 'constitutive']
+
+rule all:
+    input:
+        # `rp` stands for randomized peaks.
+        # `ri` stands for randomized integration sites.
+        expand('result/{condition}_pooled.closest_peaks.bed', condition=conditions),
+        expand('result/{condition}_pooled.closest_peaks.rp.{i}.bed', condition=conditions, i=range(N_RANDOM)),
+        expand('result/{condition}_pooled.closest_peaks.ri.{i}.bed', condition=conditions, i=range(N_RANDOM)),
+        expand('result/{condition}_pooled.closest_peaks.rpri.{i}.bed', condition=conditions, i=range(N_RANDOM)),
+
+rule download_blacklist:
+    output: config['blacklist']
+    shell: 'wget https://dohlee-bioinfo.sgp1.digitaloceanspaces.com/hiv1-rloop/hg38.blacklist.v2.bed -O {output}'
+
+rule randomize_integration_sites:
+    input:
+        integration_sites = os.path.join(integration_site_dir, '{condition}_pooled.d5.sorted.bed'),
+        blacklist = config['blacklist'],
+    output:
+        'randomized_integration_sites/{condition}_pooled.d5.{i}.sorted.bed'
+    params:
+        genome_size = config['genome_size'],
+    shell:
+        'bedtools shuffle -i {input.integration_sites} -g {params.genome_size} -excl {input.blacklist} | '
+        'bedtools sort -i stdin > {output}'
+
+rule randomize_peaks:
+    input:
+        rloops = os.path.join(rloop_peak_dir, '{condition}.summits.sorted.bed'),
+        blacklist = config['blacklist'],
+    output:
+        'randomized_peaks/{condition}_peaks.{i}.bed'
+    params:
+        genome_size = config['genome_size'],
+    shell:
+        'bedtools shuffle -i {input.rloops} -g {params.genome_size} -excl {input.blacklist} | '
+        'bedtools sort -i stdin > {output}'
+
+rule bedtools_closest:
+    # Calculate distances to the closest peaks.
+    input:
+        points = os.path.join(integration_site_dir, '{condition}_pooled.d5.sorted.bed'),
+        peaks = os.path.join(rloop_peak_dir, '{condition}.summits.sorted.bed'),
+    output:
+        'result/{condition}_pooled.closest_peaks.bed'
+    params:
+        k = K
+    shell:
+        'bedtools closest -a {input.points} -b {input.peaks} -D ref -k {params.k} > {output}'
+
+rule bedtools_closest_random_peak:
+    # Calculate distances to the closest randomized peaks.
+    # Peaks are randomized.
+    input:
+        points = os.path.join(integration_site_dir, '{condition}_pooled.d5.sorted.bed'),
+        peaks = 'randomized_peaks/{condition}_peaks.{i}.bed',
+    output:
+        'result/{condition}_pooled.closest_peaks.rp.{i}.bed'
+    params:
+        k = K
+    shell:
+        'bedtools closest -a {input.points} -b {input.peaks} -D ref -k {params.k} > {output}'
+            
+
+rule bedtools_closest_random_intsite:
+    # Calculate distances for randomized integration sites to the closest peaks.
+    # Integration sites are randomized.
+    input:
+        points = 'randomized_integration_sites/{condition}_pooled.d5.{i}.sorted.bed',
+        peaks = os.path.join(rloop_peak_dir, '{condition}.summits.sorted.bed'),
+    output:
+        'result/{condition}_pooled.closest_peaks.ri.{i}.bed'
+    params:
+        k = K
+    shell:
+        'bedtools closest -a {input.points} -b {input.peaks} -D ref -k {params.k} > {output}'
+            
+
+rule bedtools_closest_random_peak_random_intsite:
+    # Calculate distances for randomized integration sites to the closest randomized peaks.
+    # Peaks are randomized.
+    # Integration sites are randomized.
+    input:
+        points = 'randomized_integration_sites/{condition}_pooled.d5.{i}.sorted.bed',
+        peaks = 'randomized_peaks/{condition}_peaks.{i}.bed',
+    output:
+        'result/{condition}_pooled.closest_peaks.rpri.{i}.bed'
+    params:
+        k = K
+    shell:
+        'bedtools closest -a {input.points} -b {input.peaks} -D ref -k {params.k} > {output}'
+            

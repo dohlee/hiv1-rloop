@@ -1,0 +1,5 @@
+integration_site_dir: 'integration_sites'
+rloop_peak_dir: 'rloops'
+
+genome_size: '/data/project/dohoon/reference/hg38/hg38.fa.sizes'
+blacklist: '/data/project/dohoon/resource/hg38.blacklist.v2.bed'

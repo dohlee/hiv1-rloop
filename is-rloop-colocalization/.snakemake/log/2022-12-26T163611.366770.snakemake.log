@@ -1,0 +1,4 @@
+Building DAG of jobs...
+MissingInputException in line 61 of /data2/project/dohoon/rloop/github_codes/is-rloop-colocalization/Snakefile:
+Missing input files for rule bedtools_closest:
+integration_sites/induced_pooled.d5.sorted.bed

@@ -1,0 +1,34 @@
+Building DAG of jobs...
+Job counts:
+	count	jobs
+	1	all
+	9	bedtools_closest
+	900	bedtools_closest_random_intsite
+	900	bedtools_closest_random_peak
+	900	bedtools_closest_random_peak_random_intsite
+	900	randomize_integration_sites
+	900	randomize_peaks
+	4510
+
+[Mon Dec 26 16:36:55 2022]
+rule randomize_integration_sites:
+    input: integration_sites/induced_pooled.d5.sorted.bed, /data/project/dohoon/resource/hg38.blacklist.v2.bed
+    output: randomized_integration_sites/induced_pooled.d5.15.sorted.bed
+    jobid: 3242
+    wildcards: condition=induced, i=15
+
+
+[Mon Dec 26 16:36:55 2022]
+rule randomize_peaks:
+    input: rloops/6hpi.summits.sorted.bed, /data/project/dohoon/resource/hg38.blacklist.v2.bed
+    output: randomized_peaks/6hpi_peaks.16.bed
+    jobid: 444
+    wildcards: condition=6hpi, i=16
+
+RuleException in line 49 of /data2/project/dohoon/rloop/github_codes/is-rloop-colocalization/Snakefile:
+NameError: The name 'input_rloops' is unknown in this context. Please make sure that you defined that variable. Also note that braces not used for variable access have to be escaped by repeating them, i.e. {{print $1}}
+  File "/data/project/dohoon/miniconda3/lib/python3.7/site-packages/snakemake/executors/__init__.py", line 140, in run_jobs
+  File "/data/project/dohoon/miniconda3/lib/python3.7/site-packages/snakemake/executors/__init__.py", line 145, in run
+  File "/data/project/dohoon/miniconda3/lib/python3.7/site-packages/snakemake/executors/__init__.py", line 156, in _run
+  File "/data/project/dohoon/miniconda3/lib/python3.7/site-packages/snakemake/executors/__init__.py", line 176, in printjob
+  File "/data/project/dohoon/miniconda3/lib/python3.7/site-packages/snakemake/executors/__init__.py", line 162, in printjob
