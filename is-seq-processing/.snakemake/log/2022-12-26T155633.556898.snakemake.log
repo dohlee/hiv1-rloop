@@ -1,0 +1,7 @@
+Building DAG of jobs...
+WorkflowError:
+MissingInputException: Missing input files for rule bwa_index:
+reference/hg38_psh26.fa
+MissingInputException: Missing input files for rule cutadapt:
+/data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/26_dox_neg_rep1.sorted.read2.fastq.gz
+/data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/26_dox_neg_rep1.sorted.read1.fastq.gz

@@ -1,0 +1,5 @@
+Building DAG of jobs...
+MissingInputException in line 46 of /data2/project/dohoon/rloop/github_codes/is-seq-processing/Snakefile:
+Missing input files for rule cutadapt:
+/data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted26_dox_neg_rep1.read1.fastq.gz
+/data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted26_dox_neg_rep1.read2.fastq.gz

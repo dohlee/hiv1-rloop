@@ -1,0 +1,34 @@
+ascp_bin: '/data/home/dohoon/.aspera/connect/bin/ascp'
+ascp_key: '/data/home/dohoon/.aspera/connect/etc/asperaweb_id_dsa.openssh'
+
+data_dir: '/data2/project/dohoon/rloop/data/isseq_sorted'
+
+bwa_index: '/data/project/dohoon/reference/hg38/bwa_index/hg38.bwt'
+
+exps:
+    - 5dpi_rep1
+    - 5dpi_rep2
+    - MUT_rep1
+    - MUT_rep2
+    - NLS_rep1
+    - NLS_rep2
+    - PDS0_rep1
+    - PDS0_rep2
+    - PDS20_rep1
+    - PDS20_rep2
+    - WT_rep1
+    - WT_rep2
+
+exp2linker_short:
+    5dpi_rep1: TAGTCCCTTAAGCGGAG
+    5dpi_rep2: TAGTCCCTTAAGCGGAG
+    PDS0_rep1: TACTATGACGGTGACGC
+    PDS0_rep2: TACTATGACGGTGACGC
+    PDS20_rep1: TAGACTGACGCAGTCTG
+    PDS20_rep2: TAGACTGACGCAGTCTG
+    NLS_rep1: TACCGGTCAGCATAGTG
+    NLS_rep2: TACCGGTCAGCATAGTG
+    MUT_rep1: TACTGAGACGTCGATGC
+    MUT_rep2: TACTGAGACGTCGATGC
+    WT_rep1: TAGTAGTCACGAGCGTC
+    WT_rep2: TAGTAGTCACGAGCGTC

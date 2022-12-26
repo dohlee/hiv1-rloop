@@ -1,0 +1,8 @@
+Building DAG of jobs...
+InputFunctionException in line 9 of /data2/project/dohoon/rloop/github_codes/is-seq-processing/rules/bwa.smk:
+Error:
+  ValueError: 5dpi_rep1
+Wildcards:
+  exp=5dpi_rep1
+Traceback:
+  File "/data2/project/dohoon/rloop/github_codes/is-seq-processing/rules/bwa.smk", line 7, in get_reference
