@@ -1,0 +1,56 @@
+import os
+import pandas as pd
+
+configfile: 'config.yaml'
+
+include: 'rules/bwa.smk'
+include: 'rules/sambamba.smk'
+
+exps = config['exps']
+exp2linker_short = config['exp2linker_short']
+
+data_dir = config['data_dir']
+read1s = expand(os.path.join(data_dir, '{exp}.read1.fastq.gz'), exp=exps)
+read2s = expand(os.path.join(data_dir, '{exp}.read2.fastq.gz'), exp=exps)
+
+trimmed_read1s = expand('result/01_cutadapt/{exp}.read1.trimmed.fastq.gz', exp=exps)
+trimmed_read2s = expand('result/01_cutadapt/{exp}.read2.trimmed.fastq.gz', exp=exps)
+
+fastqcs = expand('result/01_cutadapt/{exp}.{read}.trimmed_fastqc.html', exp=exps, read=['read1', 'read2'])
+
+bams = expand('result/02_bwa/{exp}.sorted.bam.bai', exp=exps)
+
+ALL = []
+ALL.append(trimmed_read1s)
+ALL.append(fastqcs)
+ALL.append(bams)
+
+rule all:
+    input: ALL
+
+rule cutadapt:
+    input:
+        read1 = os.path.join(data_dir, '{exp}.read1.fastq.gz'),
+        read2 = os.path.join(data_dir, '{exp}.read2.fastq.gz'),
+    output:
+        read1 = 'result/01_cutadapt/{exp}.read1.trimmed.fastq.gz',
+        read2 = 'result/01_cutadapt/{exp}.read2.trimmed.fastq.gz',
+    params:
+        linker_short = lambda wildcards: exp2linker_short[wildcards.exp]
+    threads: 8
+    shell:
+        'cutadapt -u 49 -U 38 --minimum-length 36 '
+        '--pair-filter any --action trim -q0,0 '
+        '-a {params.linker_short} -A TGCTAGAGATTTTCCACACTGACTGGGTCTGAGGG -A GGGTCTGAGGG '
+        '--no-indels --overlap 12 -j {threads} -o {output.read1} -p {output.read2} {input.read1} {input.read2}'
+
+rule fastqc:
+    input:
+        '{prefix}.fastq.gz'
+    output:
+        html='{prefix}_fastqc.html',
+        zip='{prefix}_fastqc.zip',
+    threads: 1
+    wrapper:
+        'http://dohlee-bio.info:9193/fastqc'
+

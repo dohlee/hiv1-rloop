@@ -1,0 +1,71 @@
+Building DAG of jobs...
+Job counts:
+	count	jobs
+	1	all
+	2	bwa_index
+	12	bwa_mem
+	12	cutadapt
+	24	fastqc
+	2	get_reference_from_cloud
+	12	sambamba_index
+	12	sambamba_sort
+	77
+
+[Mon Dec 26 16:17:44 2022]
+rule cutadapt:
+    input: /data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/36_dox_neg_rep1.read1.fastq.gz, /data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/36_dox_neg_rep1.read2.fastq.gz
+    output: result/01_cutadapt/36_dox_neg_rep1.read1.trimmed.fastq.gz, result/01_cutadapt/36_dox_neg_rep1.read2.trimmed.fastq.gz
+    jobid: 7
+    wildcards: exp=36_dox_neg_rep1
+    threads: 8
+
+
+[Mon Dec 26 16:17:44 2022]
+rule cutadapt:
+    input: /data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/36_dox_neg_rep3.read1.fastq.gz, /data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/36_dox_neg_rep3.read2.fastq.gz
+    output: result/01_cutadapt/36_dox_neg_rep3.read1.trimmed.fastq.gz, result/01_cutadapt/36_dox_neg_rep3.read2.trimmed.fastq.gz
+    jobid: 9
+    wildcards: exp=36_dox_neg_rep3
+    threads: 8
+
+
+[Mon Dec 26 16:17:44 2022]
+rule cutadapt:
+    input: /data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/36_dox_pos_rep1.read1.fastq.gz, /data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/36_dox_pos_rep1.read2.fastq.gz
+    output: result/01_cutadapt/36_dox_pos_rep1.read1.trimmed.fastq.gz, result/01_cutadapt/36_dox_pos_rep1.read2.trimmed.fastq.gz
+    jobid: 10
+    wildcards: exp=36_dox_pos_rep1
+    threads: 8
+
+
+[Mon Dec 26 16:17:44 2022]
+rule cutadapt:
+    input: /data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/36_dox_pos_rep3.read1.fastq.gz, /data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/36_dox_pos_rep3.read2.fastq.gz
+    output: result/01_cutadapt/36_dox_pos_rep3.read1.trimmed.fastq.gz, result/01_cutadapt/36_dox_pos_rep3.read2.trimmed.fastq.gz
+    jobid: 12
+    wildcards: exp=36_dox_pos_rep3
+    threads: 8
+
+
+[Mon Dec 26 16:17:44 2022]
+rule cutadapt:
+    input: /data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/26_dox_neg_rep1.read1.fastq.gz, /data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/26_dox_neg_rep1.read2.fastq.gz
+    output: result/01_cutadapt/26_dox_neg_rep1.read1.trimmed.fastq.gz, result/01_cutadapt/26_dox_neg_rep1.read2.trimmed.fastq.gz
+    jobid: 1
+    wildcards: exp=26_dox_neg_rep1
+    threads: 8
+
+
+[Mon Dec 26 16:17:44 2022]
+rule get_reference_from_cloud:
+    output: reference/hg38_psh26.fa
+    jobid: 41
+    wildcards: ref=hg38_psh26
+
+RuleException in line 140 of /data2/project/dohoon/rloop/github_codes/vector-is-seq-processing/rules/bwa.smk:
+NameError: The name 'ref' is unknown in this context. Did you mean 'wildcards.ref'?
+  File "/data/project/dohoon/miniconda3/lib/python3.7/site-packages/snakemake/executors/__init__.py", line 140, in run_jobs
+  File "/data/project/dohoon/miniconda3/lib/python3.7/site-packages/snakemake/executors/__init__.py", line 145, in run
+  File "/data/project/dohoon/miniconda3/lib/python3.7/site-packages/snakemake/executors/__init__.py", line 156, in _run
+  File "/data/project/dohoon/miniconda3/lib/python3.7/site-packages/snakemake/executors/__init__.py", line 176, in printjob
+  File "/data/project/dohoon/miniconda3/lib/python3.7/site-packages/snakemake/executors/__init__.py", line 162, in printjob

@@ -1,0 +1,32 @@
+ascp_bin: '/data/home/dohoon/.aspera/connect/bin/ascp'
+ascp_key: '/data/home/dohoon/.aspera/connect/etc/asperaweb_id_dsa.openssh'
+
+data_dir: '/data3/project/dohoon/rloop/data/mAIRN_EGFP_isseq_220926_sorted/'
+
+exps:
+    - 26_dox_neg_rep1
+    - 26_dox_neg_rep2
+    - 26_dox_neg_rep3
+    - 26_dox_pos_rep1
+    - 26_dox_pos_rep2
+    - 26_dox_pos_rep3
+    - 36_dox_neg_rep1
+    - 36_dox_neg_rep2
+    - 36_dox_neg_rep3
+    - 36_dox_pos_rep1
+    - 36_dox_pos_rep2
+    - 36_dox_pos_rep3
+
+exp2linker_short:
+    26_dox_neg_rep1: TAGTCCCTTAAGCGGAG
+    36_dox_neg_rep1: TACTATGACGGTGACGC
+    26_dox_pos_rep1: TAGACTGACGCAGTCTG
+    36_dox_pos_rep1: TACCGGTCAGCATAGTG
+    26_dox_neg_rep2: TACTGAGACGTCGATGC
+    36_dox_neg_rep2: TAGTAGTCACGAGCGTC
+    26_dox_pos_rep2: TAGTCCCTTAAGCGGAG
+    36_dox_pos_rep2: TACTATGACGGTGACGC
+    26_dox_neg_rep3: TAGACTGACGCAGTCTG
+    36_dox_neg_rep3: TACCGGTCAGCATAGTG
+    26_dox_pos_rep3: TACTGAGACGTCGATGC
+    36_dox_pos_rep3: TAGTAGTCACGAGCGTC
