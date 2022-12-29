@@ -2,17 +2,24 @@ manifest: 'manifest.csv'
 data_dir: 'data'
 result_dir: 'result'
 
-star_index_dir: '/data/project/dohoon/reference/hg38/star_index'
-rsem_reference_dir: '/data/project/dohoon/reference/hg38/rsem_index'
-rsem_reference: '/data/project/dohoon/reference/hg38/rsem_index/hg38.transcripts.fa'
+ascp_bin: '/data/home/dohoon/.aspera/connect/bin/ascp'
+ascp_key: '/data/home/dohoon/.aspera/connect/etc/asperaweb_id_dsa.openssh'
+
+star_index_dir: 'star_index'
+rsem_reference_dir: 'rsem_index'
+rsem_reference: 'rsem_index/hg38.transcripts.fa'
+
+gene_annotation: 'annotation/gencode.v37.annotation.gtf'
+te_annotation: 'annotation/hg38_rmsk_TE.gtf'
 
 reference:
     name: 'hg38'
     prefix: '/data/project/dohoon/reference/hg38/hg38'
     fasta: '/data/project/dohoon/reference/hg38/hg38.fa'
-    gtf: '/data/project/dohoon/resource/gencode.v37.annotation.gtf'
+    gtf: 'annotation/merged.gtf'
 
 threads:
+    parallel_fastq_dump: 6
     trim_galore: 6
     star_genome_generate: 8
     star_2_pass: 24
@@ -55,7 +62,7 @@ trim_galore:
 
 star_genome_generate:
     extra: ''
-    sjdb_gtf_file: '/data/project/dohoon/resource/gencode.v37.annotation.gtf'
+    sjdb_gtf_file: 'annotation/merged.gtf'
     sjdb_overhang: 100
     sjdb_gtf_chr_prefix: ''
     sjdb_gtf_tag_exon_parent_transcript: 'transcript_id'
@@ -66,7 +73,7 @@ star_2_pass:
     quant_mode: 'TranscriptomeSAM'
     genome_load: 'NoSharedMemory'
     sjdb_file_chr_start_end: False
-    sjdb_gtf_file: '/data/project/dohoon/resource/gencode.v37.annotation.gtf'
+    sjdb_gtf_file: 'annotation/merged.gtf'
     sjdb_gtf_chr_prefix: ''
     sjdb_overhang: 100
     sjdb_gtf_tag_exon_parent_transcript: 'transcript_id'

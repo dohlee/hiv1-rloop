@@ -1,0 +1,158 @@
+import sys
+import pandas as pd
+from pathlib import Path
+
+configfile: 'config.yaml'
+DATA_DIR = Path(config['data_dir'])
+RESULT_DIR = Path(config['result_dir'])
+
+include: 'rules/trim-galore.smk'
+include: 'rules/fastqc.smk'
+# include: 'rules/download.smk'
+
+ruleorder: trim_galore_pe > trim_galore_se
+
+onsuccess: shell('push RNASEQ-TETRANSCRIPT OK!')
+
+manifest = pd.read_csv(config['manifest'])
+RESULT_DIR = Path(config['result_dir'])
+
+SAMPLES = manifest.run_accession.values
+SAMPLE2LIB = {r.run_accession:r.library_layout for r in manifest.to_records()}
+SE_MASK = manifest.library_layout.str.upper().str.contains('SINGLE')
+PE_MASK = manifest.library_layout.str.upper().str.contains('PAIRED')
+SE_SAMPLES = manifest[SE_MASK].run_accession.values
+PE_SAMPLES = manifest[PE_MASK].run_accession.values
+
+print(PE_SAMPLES)
+
+print(f'There are {len(SE_SAMPLES)} single-read and {len(PE_SAMPLES)} paired-end samples.')
+print(f'Single-read sample examples: {SE_SAMPLES[:3]}')
+print(f'Paired-read sample examples: {PE_SAMPLES[:3]}')
+proc = input('Proceed? [y/n]: ')
+if proc != 'y':
+    sys.exit(1)
+
+RAW_QC_SE = expand(str(DATA_DIR / '{sample}_fastqc.html'), sample=SE_SAMPLES)
+RAW_QC_PE = expand(str(DATA_DIR / '{sample}.read1_fastqc.html'), sample=PE_SAMPLES)
+TRIMMED_QC_SE = expand(str(RESULT_DIR / '01_trim_galore' / '{sample}.trimmed_fastqc.html'), sample=SE_SAMPLES)
+TRIMMED_QC_PE = expand(str(RESULT_DIR / '01_trim_galore' / '{sample}.read1.trimmed_fastqc.html'), sample=PE_SAMPLES)
+ALIGNED_BAM = expand(str(RESULT_DIR / '02_star' / '{sample}.sorted.bam'), sample=SAMPLES)
+ALIGNED_BAI = expand(str(RESULT_DIR / '02_star' / '{sample}.sorted.bam.bai'), sample=SAMPLES)
+TE_COUNTS = expand(str(RESULT_DIR / '03_tecount' / '{sample}.cntTable'), sample=SAMPLES)
+EXPRESSIONS = expand(str(RESULT_DIR / '04_rsem' / '{sample}.genes.results'), sample=SAMPLES)
+
+RESULT_FILES = []
+# RESULT_FILES.append(RAW_QC_SE)
+RESULT_FILES.append(RAW_QC_PE)
+# RESULT_FILES.append(ALIGNED_BAM)
+# RESULT_FILES.append(ALIGNED_BAI)
+RESULT_FILES.append(TE_COUNTS)
+# RESULT_FILES.append(EXPRESSIONS)
+
+rule all:
+    input: RESULT_FILES
+
+rule star_genome_generate:
+    input:
+        # Required input.
+        # NOTE: Reference genome should be uncompressed.
+        reference = config['reference']['fasta'],
+        gtf = config['star_genome_generate']['sjdb_gtf_file'],
+    output:
+        index_directory = directory(config['star_index_dir'])
+    threads: config['threads']['star_genome_generate']
+    params:
+        # Optional parameters. Read through the comments carefully.
+        # Provide appropriate option for your data,
+        # or comment out the option if it is not needed.
+        extra = config['star_genome_generate']['extra'],
+        # It is recommended to give gene annotation file in at least one of
+        # genomeGeneration or 2_pass step.
+        # Also it is recommened to use GENCODE annotation file, either of GTF of GFF3 file.
+        # Don't forget to specify sjdb_gtf_tag_exon_parent_transcript = 'Parent'
+        # in case of GFF3 annotation file.
+        sjdb_gtf_file = config['star_genome_generate']['sjdb_gtf_file'],
+        # Length of the donor/acceptor sequence on each side of the junctions,
+        # ideally = (maxReadLength - 1).
+        # In most cases, the default value of 100 will work well.
+        sjdb_overhang = config['star_genome_generate']['sjdb_overhang'],
+        # If genome is from UCSC, and annotation is from ENSEMBL,
+        # use sjdb_gtf_chr_prefix = 'chr'
+        sjdb_gtf_chr_prefix = config['star_genome_generate']['sjdb_gtf_chr_prefix'],
+        # If you use GFF3 annotation file,
+        # use sjdb_gtf_tag_exon_parent_transcript = 'Parent'
+        sjdb_gtf_tag_exon_parent_transcript = config['star_genome_generate']['sjdb_gtf_tag_exon_parent_transcript'],
+    log: 'logs/star/genome_generate/%s.log' % config['reference']['name']
+    wrapper:
+        'http://dohlee-bio.info:9193/star/genome-generate'
+
+
+rule star_multimap:
+    input:
+        read1 = str(RESULT_DIR / '01_trim_galore' / '{sample}.read1.trimmed.fastq.gz'),
+        read2 = str(RESULT_DIR / '01_trim_galore' / '{sample}.read2.trimmed.fastq.gz'),
+        index_directory = directory(config['star_index_dir']),
+    output:
+        genome_alignment = RESULT_DIR / '02_star' / '{sample}.sorted.bam'
+    threads: config['threads']['star_2_pass']
+    shell:
+        'STAR '
+        '--runMode alignReads '
+        '--runThreadN {threads} '
+        '--readFilesIn {input.read1} {input.read2} '
+        '--readFilesCommand zcat ' 
+        '--genomeDir {input.index_directory} '  # Soft-linked.
+        '--outFileNamePrefix result/02_star/{wildcards.sample}. '
+        '--outSAMtype BAM SortedByCoordinate '
+        # TE-specific options.
+        '--outFilterMultimapNmax 100 '
+        '--winAnchorMultimapNmax 100 '
+        '--outMultimapperOrder Random '
+        '--runRNGseed 777 '
+        '--outSAMmultNmax 1 '
+        '--outFilterType BySJout '
+        '--alignSJoverhangMin 8 ' 
+        '--alignSJDBoverhangMin 1 '
+        # '--outFilterMismatchNmax 999 '
+        '--alignIntronMin 20 '
+        '--alignIntronMax 1000000 '
+        '--alignMatesGapMax 1000000 && '
+        'mv result/02_star/{wildcards.sample}.Aligned.sortedByCoord.out.bam result/02_star/{wildcards.sample}.sorted.bam'
+
+rule sambamba_index:
+    input:
+        RESULT_DIR / '02_star' / '{sample}.sorted.bam'
+    output:
+        RESULT_DIR / '02_star' / '{sample}.sorted.bam.bai'
+    threads: 8
+    log: 'logs/sambamba_index/{sample}.log'
+    benchmark: 'benchmarks/sambamba_index/{sample}.benchmark'
+    wrapper:
+        'http://dohlee-bio.info:9193/sambamba/index'
+
+rule download_annotation:
+    output:
+        'annotation/{name}.gtf'
+    shell:
+        'wget https://dohlee-bioinfo.sgp1.digitaloceanspaces.com/hiv1-rloop/{wildcards.name}.gtf -O {output}'
+
+rule tecount:
+    input:
+        bam = RESULT_DIR / '02_star' / '{sample}.sorted.bam',
+        gene_annotation = config['gene_annotation'],
+        te_annotation = config['te_annotation'],
+    output:
+        RESULT_DIR / '03_tecount' / '{sample}.cntTable'
+    params:
+        project = lambda wc: str(RESULT_DIR / '03_tecount' / f'{wc.sample}')
+    # conda:
+        # 'envs/tetranscripts.yaml'
+    threads: 1
+    shell:
+        'TEcount '
+        '-b {input} '
+        '--project {params.project} '
+        '--sortByPos '
+        '--GTF {input.gene_annotation} '
+        '--TE {input.te_annotation}'
