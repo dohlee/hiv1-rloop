@@ -42,3 +42,18 @@ This directory contains the processing pipeline for HIV-1 integration site-seque
 *Related to Fig. 5*
 
 This directory contains the pipeline for vector IS-seq data processing. Pipeline details are same with `is-seq-processing`.
+
+## Citation
+
+Park, K., Lee, D., Jeong, J., Lee, S., Kim, S., & Anh, S. Learning the histone codes with large genomic windows and three-dimensional chromatin interactions using transformer. bioRxiv (2024)
+
+```
+@article{park2024human,
+  title={Human immunodeficiency virus-1 induces and targets host genomic R-loops for viral genome integration},
+  author={Park, Kiwon and Lee, Dohoon and Jeong, Jiseok and Lee, Sungwon and Kim, Sun and Ahn, Kwangseog},
+  journal={bioRxiv},
+  pages={2024--03},
+  year={2024},
+  publisher={Cold Spring Harbor Laboratory}
+}
+```
